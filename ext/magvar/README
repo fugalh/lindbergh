@@ -1,0 +1,2 @@
+coremag.[hc]xx lifted from SimGear (http://www.simgear.org/, GPL), and modified
+only so far as to get it to compile and have C linkage.
