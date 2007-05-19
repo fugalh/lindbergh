@@ -6,7 +6,7 @@ module MagVar
   # jd:: Julian date
   #
   # Returns the magnetic variance in radians
-  def var(lat, lon, alt, jd)
+  def self.var(lat, lon, alt, jd)
     vardip(lat, lon, alt, jd).first
   end
 
@@ -15,7 +15,7 @@ module MagVar
   # jd:: Julian date
   #
   # Returns the magnetic dip in radians
-  def dip(lat, lon, alt, jd)
+  def self.dip(lat, lon, alt, jd)
     vardip(lat, lon, alt, jd).last
   end
 end
