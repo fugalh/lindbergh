@@ -1,13 +1,14 @@
 require 'magvar.so'
 
 module MagVar
-  # lat/lon:: decimal degrees (S and W are negative)
+  # lat/lon:: decimal radians (S and W are negative)
   # alt:: altitude above sea level in km
   # jd:: Julian date
   #
   # Returns the magnetic variance in radians
   def self.var(lat, lon, alt, jd)
-    vardip(lat, lon, alt, jd).first
+    var, dip = vardip(lat, lon, alt, jd)
+    var
   end
 
   # lat/lon:: decimal degrees (S and W are negative)
@@ -16,6 +17,7 @@ module MagVar
   #
   # Returns the magnetic dip in radians
   def self.dip(lat, lon, alt, jd)
-    vardip(lat, lon, alt, jd).last
+    var, dip = vardip(lat, lon, alt, jd)
+    dip
   end
 end
