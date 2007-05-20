@@ -1,23 +1,26 @@
 require 'magvar.so'
+require 'aviation/coordinate'
 
-module Flan
+module Aviation
   module MagVar
-    # lat/lon:: decimal radians (S and W are negative)
+    # coord:: Aviation::Coordinate
     # alt:: altitude above sea level in km
     # jd:: Julian date
     #
     # Returns the magnetic variance in radians
-    def self.var(lat, lon, alt, jd)
+    def self.var(coord, alt, jd)
+      lat, lon = coord.to_a
       var, dip = vardip(lat, lon, alt, jd)
       var
     end
 
-    # lat/lon:: decimal degrees (S and W are negative)
+    # coord:: Aviation::Coordinate
     # alt:: altitude above sea level in km
     # jd:: Julian date
     #
     # Returns the magnetic dip in radians
-    def self.dip(lat, lon, alt, jd)
+    def self.dip(coord, alt, jd)
+      lat, lon = coord.to_a
       var, dip = vardip(lat, lon, alt, jd)
       dip
     end

@@ -22,7 +22,7 @@ static VALUE vardip(VALUE self, VALUE lat, VALUE lon, VALUE alt, VALUE jd)
 
 void Init_magvar() {
     VALUE flan, mod;
-    flan = rb_define_module("Flan");
+    flan = rb_define_module("Aviation");
     mod = rb_define_module_under(flan, "MagVar");
     rb_define_module_function(mod, "vardip", vardip, 4);
 }
