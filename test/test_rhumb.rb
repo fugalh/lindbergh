@@ -1,8 +1,8 @@
 require 'test/unit'
-require 'rhumb'
+require 'aviation/rhumb'
 
 class RhumbTest < Test::Unit::TestCase
-  include Rhumb
+  include Aviation
   def dec(deg, min=0)
     deg + min/60.0
   end

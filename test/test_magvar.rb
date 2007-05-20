@@ -1,9 +1,10 @@
 require 'test/unit'
-require 'magvar'
-require 'rhumb' # for radian conversion
+require 'aviation/magvar'
+require 'aviation/rhumb' # for radian conversion
 require 'date'
 
 class MagVarTest < Test::Unit::TestCase
+  include Aviation
   def dec(deg, min=0)
     deg + min/60.0
   end
