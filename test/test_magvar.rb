@@ -18,6 +18,6 @@ class MagVarTest < Test::Unit::TestCase
     # the answer is 9° 24' E
     ans = dec(9, 24).rad
 
-    puts MagVar.var(lat, lon, 1.37, d).deg
+    assert_in_delta 1, MagVar.var(lat, lon, alt, d)/ans, 0.01
   end
 end
