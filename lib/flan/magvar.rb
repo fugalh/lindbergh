@@ -1,6 +1,6 @@
 require 'magvar.so'
 
-module Aviation
+module Flan
   module MagVar
     # lat/lon:: decimal radians (S and W are negative)
     # alt:: altitude above sea level in km

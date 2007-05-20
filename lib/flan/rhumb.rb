@@ -9,7 +9,7 @@ class Numeric
   end
 end
 
-module Aviation
+module Flan
   module Rhumb
     Eccentricity = 0.081
     R = 6378.155 # km
