@@ -111,5 +111,28 @@ module Aviation
 
       sprintf "%3d°%6.3f'%s %3d°%6.3f'%s", d1, m1, ns, d2, m2, ew
     end
+
+    def +(o)
+      case o
+      when Coordinate
+        [@lat + o.lat, @lon + o.lon].coord
+      when Numeric
+        [@lat + o, @lon + o].coord
+      else
+        raise ArgumentError
+      end
+    end
+    def -(o)
+      self + (-o)
+    end
+    def -@
+      [-@lat, -@lon].coord
+    end
+    def /(scalar)
+      [@lat / scalar, @lon / scalar].coord
+    end
+    def *(scalar)
+      [@lat * scalar, @lon * scalar].coord
+    end
   end
 end

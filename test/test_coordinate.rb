@@ -14,4 +14,20 @@ class CoordinateTest < Test::Unit::TestCase
     assert_equal c1.lat, c2.lat
     assert_equal c1.lon, c2.lon
   end
+  def test_arithmetic
+    # calculate a simple little average
+    r = [
+      [32.290541.rad, -106.922206.rad].coord,
+      [32.291891.rad, -106.921349.rad].coord,
+      [32.284956.rad, -106.922420.rad].coord
+    ]
+    sum = r.inject([0,0].coord) {|s,c| s+c}
+    assert_instance_of Coordinate, sum
+    avg = sum/3
+    assert_instance_of Coordinate, avg
+
+    sum2 = r.inject(0) {|s,c| s + c.lat}
+    avg2 = sum2/3
+    assert_equal avg2, avg.lat
+  end
 end
