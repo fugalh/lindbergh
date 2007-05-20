@@ -11,7 +11,7 @@ end
 
 module Rhumb
   Eccentricity = 0.081
-  R = 6378 # km
+  R = 6378.155 # km
 
   # lat/lon are in decimal degrees
   # Returns a polar vector [r, theta] (km, radians)
