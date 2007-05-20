@@ -1,3 +1,4 @@
+Name="lindbergh"
 task :default => [:test, :doc]
 
 task :install => [:setup] do
@@ -7,7 +8,7 @@ end
 
 desc "RDoc documentation"
 task :doc do
-  sh 'rdoc -t "flan" -m README README lib'
+  sh "rdoc -t #{Name} -m README README lib"
 end
 
 file '.config' do
@@ -25,7 +26,7 @@ task :clean do
 end
 
 task :dist do
-  sh 'darcs dist -d flan-`cat VERSION`'
+  sh "darcs dist -d #{Name}-`cat VERSION`"
 end
 
 require 'rake/testtask'
