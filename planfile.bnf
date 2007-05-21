@@ -1,0 +1,66 @@
+(* tokens *)
+ident
+number
+str
+
+plan = (statement ';')*.
+
+statement = 
+      ('from'|'via'|'to') ident
+    | ('from'|'via'|'to') ident radial ident radial ncc
+    | ('from'|'via'|'to') ident direction '/' dist ncc
+    | ('from'|'via'|'to') lat lon ncc
+    | 'via' dist ncc
+    | 'climb' alt climb_rate
+    | ['desc'|'descend'] alt climb_rate
+    | [('fuel' ['amt'|'amount'])|'fuel_amount'] fuel_qty
+    | [('fuel' 'rate')|'fuel_rate'] fuel_rate
+    | [('fuel' 'used')|'fuel_used'] fuel_qty
+    | 'alt' alt.
+    | 'comment' str
+    | 'nav' number ident
+    | 'ias' speed
+    | 'tas' speed
+    | 'temp' temp
+    | 'wind' direction '@' speed.
+
+radial = direction.
+direction = number [deg|rad].
+deg = '°'|'deg'|'degree'|'degrees'.
+rad = 'rad'|'rads'|'radians'.
+
+ncc = [name [city [comment]]].
+name = str.
+city = str.
+comment = str.
+
+dist = number [dist_unit].
+dist_unit = sm|nm|km|ft|meter.
+sm = 'sm'|'smi'|'mi'|'mile'|'miles'.
+nm = 'nm'|'nmi'.
+km = 'km'|'kilometer'|'kilometers'.
+ft = 'feet'|'ft'|'f'.
+meter = 'meter'|'m'.
+
+speed = number [speed_unit].
+speed_unit = mph|kts|kph|fps|mps.
+mph = 'mph'.
+kts = 'knot'|'knots'|'kt'|'kts'.
+kph = 'kph'.
+fps = 'fps'.
+mps = 'mps'.
+
+lat = ordinate ['N'|'S'|'n'|'s'].
+lon = ordinate ['E'|'W'|'e'|'w'].
+ordinate = 
+      number rad
+    | number [deg [number "'" [number '"']]].
+
+alt = number [dist_unit].
+
+climb_rate = speed.
+
+fuel_qty = number.
+fuel_rate = number.
+
+temp = number [deg] ['C'|'F'|'c'|'f'].
