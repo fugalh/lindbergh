@@ -1,12 +1,10 @@
 Use SimGear (simgear/magvar/coremag.[hc]xx) for magnetic variation.
 Use rhumb courses (http://www.cwru.edu/artsci/math/alexander/mathmag349-356.pdf)
-Use {apt,nav,fix}.dat from flightgear/xplane
-allow user db
+Use {apt,nav,fix}.dat from flightgear/xplane and user db for checkpoints
 
 User specifies:
     waypoints
     tas, altitude, climb/descend, wind, compass deviation, fuel amt/rate/extra
 
 output:
-    txt or pdf flight plan (using http://ruby-pdf.rubyforge.org/pdf-writer/)
-        above info plus: course, magnetic variation, estimated stuff
+    text (stdout) or html (maybe pdf later)

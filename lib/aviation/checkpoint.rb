@@ -1,7 +1,7 @@
 require 'aviation/coordinate'
 
 module Aviation
-  class Waypoint
+  class Checkpoint
     attr_accessor :coord, :id
     def initialize(coord, id)
       @coord, @id = [coord, id]
@@ -12,13 +12,13 @@ module Aviation
     def lon=(l); coord.lon = l; end
   end
 
-  class Fix < Waypoint
+  class Fix < Checkpoint
   end
 
   # alt:: feet above MSL
   # freq:: MHz
   # range:: nm
-  class NavAid < Waypoint
+  class NavAid < Checkpoint
     attr_accessor :alt, :freq, :range, :name
     def initialize(coord, alt, freq, range, name)
       super(coord, id)
@@ -46,7 +46,7 @@ module Aviation
   # is recommended to take either the tower position, the average beacon
   # position, or the average runway center. The calc_coord method will
   # facilitate this.
-  class Airport < Waypoint
+  class Airport < Checkpoint
     attr_accessor :alt, :name, :runways, :tower, :beacons, :freqs
     def initialize(alt, id, name)
       @alt, @id, @name = [alt, id, name]
