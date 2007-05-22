@@ -15,18 +15,24 @@ file '.config' do
   sh 'ruby setup.rb config'
 end
 
-task :setup => ['.config'] do
+task :setup => ['.config', :racc] do
   sh 'ruby setup.rb setup'
 end
 
 desc 'clean up'
 task :clean do
   sh 'ruby setup.rb clean'
-  sh 'rm -rf doc'
+  sh 'rm -rf doc lib/lindbergh/plan.tab.rb'
 end
 
 task :dist do
   sh "darcs dist -d #{Name}-`cat VERSION`"
+end
+
+desc 'racc'
+task :racc => ['lib/lindbergh/plan.tab.rb']
+file 'lib/lindbergh/plan.tab.rb' do
+  sh 'cd lib/lindbergh; racc plan.y'
 end
 
 require 'rake/testtask'

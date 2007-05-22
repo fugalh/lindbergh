@@ -8,24 +8,24 @@ plan = (statement ';')*.
 statement = 
       ('from'|'via'|'to') ident
     | ('from'|'via'|'to') ident radial ident radial ncc
-    | ('from'|'via'|'to') ident direction '/' dist ncc
+    | ('from'|'via'|'to') ident dir '/' dist ncc
     | ('from'|'via'|'to') lat lon ncc
     | 'via' dist ncc
     | 'climb' alt climb_rate
     | ['desc'|'descend'] alt climb_rate
-    | [('fuel' ['amt'|'amount'])|'fuel_amount'] fuel_qty
+    | ('fuel' ['amt'|'amount'])|'fuel_amount' fuel_qty
     | [('fuel' 'rate')|'fuel_rate'] fuel_rate
     | [('fuel' 'used')|'fuel_used'] fuel_qty
-    | 'alt' alt.
+    | 'alt' alt
     | 'comment' str
     | 'nav' number ident
     | 'ias' speed
     | 'tas' speed
     | 'temp' temp
-    | 'wind' direction '@' speed.
+    | 'wind' dir '@' speed.
 
-radial = direction.
-direction = number [deg|rad].
+radial = dir.
+dir = number [deg|rad].
 deg = '°'|'deg'|'degree'|'degrees'.
 rad = 'rad'|'rads'|'radians'.
 
