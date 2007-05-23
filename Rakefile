@@ -31,7 +31,7 @@ end
 
 desc 'racc'
 task :racc => ['lib/lindbergh/plan.tab.rb']
-file 'lib/lindbergh/plan.tab.rb' do
+file 'lib/lindbergh/plan.tab.rb' => ['lib/lindbergh/plan.y'] do
   sh 'cd lib/lindbergh; racc plan.y'
 end
 
