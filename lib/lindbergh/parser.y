@@ -1,37 +1,40 @@
 class PlanParser
+
 token ident descend fuel_amount fuel_rate fuel_used str deg rad number sm nmi km ft meter mph kts kph fps mps cf to
+
 rule
-plan:                           { result = @planfile }
-    | statement ';' plan        { result = val[2] }
+
+plan: # nil
+    | statement ';' plan
     ;
 
 statement: fromviato checkpoint 
-         { @plan.add_waypoint(:checkpoint, val[1]) }
+         { @plan.push Waypoint::Checkpoint.new(val[1]) }
 
          | fromviato checkpoint radial checkpoint radial ncc 
-         { @plan.add_waypoint(:intersection, val[1..5]) }
+         { @plan.push Waypoint::Intersection.new(*val[1..5]) }
 
          | fromviato checkpoint dir '/' dist ncc
-         { @plan.add_waypoint(:rnav, val[1..5]) }
+         { @plan.push Waypoint::RNAV.new(val[1], val[2], val[4], val[5]) }
 
          # flattened due to shift/reduce conflict
          | 'from' latlon ncc
-         { @plan.add_waypoint(:coord, val[1..2]) }
+         { @plan.push Waypoint::Waypoint.new(*val[1..2]) }
          | 'viat' latlon ncc
-         { @plan.add_waypoint(:coord, val[1..2]) }
+         { @plan.push Waypoint::Waypoint.new(*val[1..2]) }
          | 'to' latlon ncc
-         { @plan.add_waypoint(:coord, val[1..2]) }
+         { @plan.push Waypoint::Waypoint.new(*val[1..2]) }
 
          | 'via' dist ncc
-         { @plan.add_waypoint(:incremental, val[1..2]) }
+         { @plan.push Waypoint::Incremental.new(*val[1..2]) }
          | 'to' dist ncc
-         { @plan.add_waypoint(:incremental, val[1..2]) }
+         { @plan.push Waypoint::Incremental.new(*val[1..2]) }
 
          | 'climb' alt climb_rate
-         { @plan.add_waypoint(:climb, val[1..2]) }
+         { @plan.push Waypoint::Climb.new(*val[1..2]) }
 
          | descend alt climb_rate
-         { @plan.add_waypoint(:descend, val[1..2]) }
+         { @plan.push Waypoint::Descend.new(*val[1..2]) }
 
          | fuel_amount fuel_qty
          { @plan.last.fuel_amount = val[1] }
@@ -67,12 +70,17 @@ statement: fromviato checkpoint
 vor: checkpoint { error "Expected a VOR" unless VOR === val[0] }
    ;
 
-checkpoint: ident { result = @db.closest(val[0]) }
+checkpoint: ident 
+          { 
+            coord = @plan.last.coord unless @plan.empty?
+            result = Aviation::Checkpoint.closest(coord, val[0].upcase)
+          }
           ;
 
-fromviato: 'from' { 
+fromviato: 'from' 
+   { 
      @plan = Plan.new
-     @planfile.plans.push @plan
+     @pf.plans.push @plan
    }
    | 'via' | 'to'
    ;

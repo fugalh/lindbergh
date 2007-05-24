@@ -1,6 +1,5 @@
 require 'test/unit'
-require 'aviation/coordinate'
-require 'aviation/magvar'
+require 'lindbergh'
 require 'date'
 
 class MagVarTest < Test::Unit::TestCase

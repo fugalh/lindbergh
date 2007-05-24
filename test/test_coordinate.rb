@@ -1,5 +1,5 @@
 require 'test/unit'
-require 'aviation/coordinate'
+require 'lindbergh'
 
 class CoordinateTest < Test::Unit::TestCase
   include Aviation

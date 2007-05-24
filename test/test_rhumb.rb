@@ -1,5 +1,5 @@
 require 'test/unit'
-require 'aviation/rhumb'
+require 'lindbergh'
 
 class RhumbTest < Test::Unit::TestCase
   include Aviation

@@ -1,16 +1,87 @@
-require 'aviation/coordinate'
+require 'lindbergh'
 require 'zlib'
+require 'active_record'
+
+# this is an ugly, ugly hack in response to an ugly, ugly bug.
+class ActiveRecord::Base
+  include Aviation
+end
 
 module Aviation
-  class Checkpoint
-    attr_accessor :coord, :id
-    def initialize(coord, id)
-      @coord, @id = [coord, id]
+  module LatLon
+    def coord
+      [lat, lon].coord
     end
-    def lat; coord.lat; end
-    def lon; coord.lon; end
-    def lat=(l); coord.lat = l; end
-    def lon=(l); coord.lon = l; end
+    def coord=(c)
+      self.lat, self.lon = c.to_a
+    end
+  end
+
+  class Checkpoint < ActiveRecord::Base
+    include LatLon
+    def self.open(dbfile, init=false)
+      ActiveRecord::Base.establish_connection(:adapter => 'sqlite3',
+                                              :database => dbfile)
+
+      if init
+        ActiveRecord::Schema.define do
+          create_table :checkpoints do |t|
+            t.column :type, :string
+            t.column :lat, :float
+            t.column :lon, :float
+            t.column :ident, :string
+            t.column :alt, :string
+            t.column :freq, :float
+            t.column :range, :float
+            t.column :name, :string
+            t.column :variation, :float
+          end
+          add_index :checkpoints, :ident
+          create_table :towers do |t|
+            t.column :checkpoint_id, :integer
+            t.column :lat, :float
+            t.column :lon, :float
+          end
+          create_table :runways do |t|
+            t.column :airport_id, :integer
+            t.column :lat, :float
+            t.column :lon, :float
+            t.column :num, :string
+            t.column :heading, :float
+            t.column :length, :float
+          end
+          create_table :frequencies do |t|
+            t.column :airport_id, :integer
+            t.column :mhz, :float
+            t.column :name, :string
+          end
+          create_table :beacons do |t|
+            t.column :airport_id, :integer
+            t.column :lat, :float
+            t.column :lon, :float
+            t.column :color, :integer
+            t.column :name, :string
+          end
+        end
+      end
+    end
+
+    # Find the airport/navaid/fix identified by ident that's closest to coord
+    def self.closest(coord, ident)
+      a = self.find_all_by_ident(ident)
+      return nil if a.nil? 
+      closest = a.first
+      return closest if coord.nil?
+
+      a.each do |cp|
+        closest = if coord.dist(cp.coord) < coord.dist(closest.coord)
+                    cp
+                  else
+                    closest
+                  end
+      end
+      closest
+    end
   end
 
   class Fix < Checkpoint; end
@@ -18,22 +89,10 @@ module Aviation
   # alt:: feet above MSL
   # freq:: MHz
   # range:: nm
-  class NavAid < Checkpoint
-    attr_accessor :alt, :freq, :range, :name
-    def initialize(coord, alt, freq, range, id, name)
-      super(coord, id)
-      @alt, @freq, @range, @name = [alt, freq, range, name]
-    end
-  end
+  class NavAid < Checkpoint; end
 
   # variation:: slaved variation (radians)
-  class VOR < NavAid
-    attr_accessor :variation
-    def initialize(coord, alt, freq, range, variation, id, name)
-      super(coord, alt, freq, range, id, name)
-      @variation = variation
-    end
-  end
+  class VOR < NavAid; end
   class NDB < NavAid; end
 
   # alt:: feet above MSL
@@ -47,13 +106,10 @@ module Aviation
   # position, or the average runway center. The calc_coord method will
   # facilitate this.
   class Airport < Checkpoint
-    attr_accessor :alt, :name, :runways, :tower, :beacons, :freqs
-    def initialize(alt, id, name)
-      @alt, @id, @name = [alt, id, name]
-      @runways = []
-      @beacons = []
-      @freqs = []
-    end
+    has_one :tower
+    has_many :runways
+    has_many :frequencies
+    has_many :beacons
 
     # Call this after you have set all the data. It will choose as the
     # coordinate for this Airport either the tower position (if it exists), the
@@ -62,193 +118,209 @@ module Aviation
     def calc_coord
       # calculate the average of an array of Coordinate
       def avg(ary)
-        raise ArgumentError if ary.empty?
         sum = ary.inject([0,0].coord) {|sum,c| sum + c}
+        return sum if ary.empty?
         sum / ary.size
       end
 
-      @coord = if @tower
-                 @tower.coord
-               elsif @beacons.size > 0
-                 avg(@beacons.map {|b| b.coord})
-               else
-                 avg(@runways.map {|r| r.center})
-               end
+      self.coord = if tower
+                     tower.coord
+                   elsif beacons.size > 0
+                     avg(beacons.map {|b| b.coord})
+                   else
+                     avg(runways.map {|r| r.center})
+                   end
     end
 
     # This will call calc_coord when @coord is nil.
     def coord
-      calc_coord if @coord.nil?
-      @coord
-    end
-
-    class Runway
-      attr_accessor :center, :number, :heading, :length
-      def initialize(center, number, heading, length)
-        @center, @number, @heading, @length = [center, number, heading, length]
-      end
-    end
-
-    class Frequency
-      attr_accessor :mhz, :name
-      def initialize(mhz, name)
-        @mhz, @name = [mhz, name]
-      end
-    end
-
-    class Beacon
-      attr_accessor :coord, :color, :name
-      def initialize(coord, color, name)
-        @coord, @color, @name = [coord, color, name]
-      end
-    end
-  end
-
-  class SeaplaneBase < Airport
-    def initialize(alt, id, name)
+      calc_coord if lat.nil? or lon.nil?
       super
     end
-  end
 
-  class Heliport < Airport
-    def initialize(alt, id, name)
-      super
+    alias :freqs :frequencies
+
+    class Tower < ActiveRecord::Base; 
+      set_table_name "towers"
+      include LatLon
+    end
+
+    class Runway < ActiveRecord::Base
+      set_table_name "runways"
+      include LatLon
+      belongs_to :airport
+      alias :center :coord
+      alias :center= :coord=
+    end
+
+    class Frequency < ActiveRecord::Base
+      set_table_name "frequencies"
+      belongs_to :airport
+    end
+
+    class Beacon < ActiveRecord::Base
+      set_table_name "beacons"
+      belongs_to :airport
     end
   end
 
-  # Parse apt.dat given a filename and produce a Hash of Arrays of Airport
-  # objects (i.e. if there's two KLRU airports, hsh['KLRU'] #=> [klru1, klru2].
-  # This is true even if there's only one KLRU). If hsh is passed in, it will
-  # be added to rather than producing a new hash. In this way you can produce a
-  # Hash of Arrays of Checkpoint objects without a costly merge operation.
-  def self.parse_apt(fn, hsh={})
-    f = File.open(fn)
-    gz = Zlib::GzipReader.new(f)
-    gz ||= f
+  class SeaplaneBase < Airport; end
 
-    gz.readline =~ /^[IA]/i or raise "Expected filetype marker in apt.dat"
-    gz.readline =~ /^810/i or raise "I only know version 810 of apt.dat"
+  class Heliport < Airport; end
 
-    apt = nil
-    until (l = gz.readline) =~ /^99\s*$/
-      l.strip!
-      next if l =~ /^\s*$/
-      t, l = l.split(' ', 2)
-      t = t.to_i
-      case t
-      when 1,16,17
-        alt, hastower, displaybuildings, icao, name = l.split(' ', 5)
-        alt = alt.to_i
+  class Checkpoint
+
+    # Parse apt.dat{,.gz} given a filename. An ActiveRecord connection to a
+    # database is required.
+    # objects (i.e. if there's two KLRU airports, hsh['KLRU'] #=> [klru1,
+    # klru2].  This is true even if there's only one KLRU). If hsh is passed
+    # in, it will be added to rather than producing a new hash. In this way you
+    # can produce a Hash of Arrays of Checkpoint objects without a costly merge
+    # operation.
+    def self.parse_apt(fn)
+      f = File.open(fn)
+      gz = Zlib::GzipReader.new(f)
+      gz ||= f
+
+      gz.readline =~ /^[IA]/i or raise "Expected filetype marker in apt.dat"
+      gz.readline =~ /^810/i or raise "I only know version 810 of apt.dat"
+
+      apt = nil
+      until (l = gz.readline) =~ /^99\s*$/
+        l.strip!
+        next if l.empty?
+        t, l = l.split(' ', 2)
+        t = t.to_i
         case t
-        when 1
-          apt = Airport.new(alt, icao, name)
-        when 16
-          apt = SeaplaneBase.new(alt, icao, name)
-        when 17
-          apt = Heliport.new(alt, icao, name)
+        when 1,16,17
+          unless apt.nil?
+            apt.calc_coord
+            apt.save
+          end
+
+          alt, hastower, displaybuildings, icao, name = l.split(' ', 5)
+          alt = alt.to_i
+          case t
+          when 1
+            apt = Airport.new(:alt => alt, :ident => icao, :name => name)
+          when 16
+            apt = SeaplaneBase.new(:alt => alt, :ident => icao, :name => name)
+          when 17
+            apt = Heliport.new(:alt => alt, :ident => icao, :name => name)
+          end
+
+        when 10
+          lat, lon, num, hdg, len, thresh, stopwy, width, lighting, sfc, 
+            shldr, markings, smoothness, distrem, vasi = l.split(' ', 15)
+          num =~ /^([^x]*)x*$/
+          num = $1
+          next if num.empty? # skip taxiways
+          lat = lat.to_f.rad
+          lon = lon.to_f.rad
+          hdg = hdg.to_f.rad
+          len = len.to_i
+          apt.runways.create(:lat => lat, :lon => lon, :num => num, 
+                             :heading => hdg, :length => len)
+
+        when 14
+          lat, lon, ht, draw, name = l.split(' ', 5)
+          lat = lat.to_f.rad
+          lon = lon.to_f.rad
+          apt.create_tower(:lat => lat, :lon => lon)
+
+        when 18
+          lat, lon, color, name = l.split(' ', 4)
+          coord = [lat.to_f.rad, lon.to_f.rad].coord
+          color = color.to_i
+          apt.beacons.create(:lat => lat, :lon => lon, :color => color, 
+                             :name => name)
+        when 15,19
+          # ignore startup positions and windsocks
+          #
+        when (50..59)
+          mhz, name = l.split
+          mhz = mhz.to_f/100
+          apt.freqs.create(:mhz => mhz, :name => name)
+
+        else
+          raise "Unexpected code in apt.dat (#{t} #{l})"
         end
-        hsh[icao] ||= []
-        hsh[icao].push apt
-      when 10
-        lat, lon, num, hdg, len, thresh, stopwy, width, lighting, sfc, 
-          shldr, markings, smoothness, distrem, vasi = l.split(' ', 15)
-        num =~ /^([^x]*)x*$/
-        num = $1
-        next if num.empty? # skip taxiways
+      end
+
+      unless apt.nil?
+        apt.calc_coord
+        apt.save
+      end
+
+      f.close
+    end
+
+    # As with parse_apt, but for nav.dat
+    def self.parse_nav(fn, hsh={})
+      f = File.open(fn)
+      gz = Zlib::GzipReader.new(f) rescue nil
+      gz ||= f
+
+      gz.readline =~ /^[IA]/i or raise "Expected filetype marker in nav.dat"
+      gz.readline =~ /^810 Version/i or raise "I only know version 810 of nav.dat"
+
+      gz.each_line do |l|
+        l.strip!
+        next if l =~ /^\s*$/
+        code, lat, lon, alt, freq, range, mp, ident, name = l.split(' ', 9)
         lat = lat.to_f.rad
         lon = lon.to_f.rad
-        hdg = hdg.to_f.rad
-        len = len.to_i
-        center = [lat, lon].coord
-        rwy = Airport::Runway.new(center, num, hdg, len)
-        apt.runways.push rwy
-      when 14
-        lat, lon, ht, draw, name = l.split(' ', 5)
-        coord = [lat.to_f.rad, lon.to_f.rad].coord
-        apt.tower ||= coord
-      when 18
-        lat, lon, color, name = l.split(' ', 4)
-        coord = [lat.to_f.rad, lon.to_f.rad].coord
-        color = color.to_i
-        apt.beacons.push Airport::Beacon.new(coord, color, name)
-      when 15,19
-        # ignore startup positions and windsocks
-      when (50..59)
-        mhz, name = l.split
-        mhz = mhz.to_f/100
-        apt.freqs.push Airport::Frequency.new(mhz, name)
-      else
-        raise "Unexpected code in apt.dat (#{t} #{l})"
+        code = code.to_i
+        case code
+        when (4..13)
+          # ignore localiser, glideslope, markers, dme
+        when 2,3
+          alt = alt.to_i
+          freq = freq.to_f/100
+          range = range.to_i
+
+          nav = if code == 2
+                  NDB.new(:lat => lat, :lon => lon, :alt => alt, :freq => freq, 
+                          :range => range, :ident => ident, :name => name)
+                else
+                  VOR.new(:lat => lat, :lon => lon, :alt => alt, :freq => freq, 
+                          :range => range, :variation => mp.to_f.rad,  
+                          :ident => ident, :name => name)
+                end
+          nav.save
+
+        when 99
+          break
+
+        else
+          raise "Unexpected code in nav.dat (#{l})"
+        end
       end
+
+      f.close
     end
 
-    f.close
-    hsh
-  end
+    # As with parse_apt, but for fix.dat
+    def self.parse_fix(fn)
+      f = File.open(fn)
+      gz = Zlib::GzipReader.new(f) rescue nil
+      gz ||= f
 
-  # As with parse_apt, but for nav.dat
-  def self.parse_nav(fn, hsh={})
-    f = File.open(fn)
-    gz = Zlib::GzipReader.new(f) rescue nil
-    gz ||= f
+      gz.readline =~ /^[IA]/i or raise "Expected filetype marker in fix.dat"
+      gz.readline =~ /^600 Version/i or raise "I only know verson 600 of fix.dat"
 
-    gz.readline =~ /^[IA]/i or raise "Expected filetype marker in nav.dat"
-    gz.readline =~ /^810 Version/i or raise "I only know version 810 of nav.dat"
+      gz.each_line do |l|
+        l.strip!
+        next if l =~ /^\s*$/
+        break if l =~ /^99\s*$/
+        lat, lon, ident = l.split
+        lat = lat.to_f.rad
+        lon = lon.to_f.rad
 
-    gz.each_line do |l|
-      l.strip!
-      next if l =~ /^\s*$/
-      code, lat, lon, alt, mhz, range, mp, id, name = l.split(' ', 9)
-      code = code.to_i
-      case code
-      when (4..13)
-        # ignore localiser, glideslope, markers, dme
-      when 2,3
-        coord = [lat.to_f.rad, lon.to_f.rad].coord
-        alt = alt.to_i
-        freq = freq.to_f/100
-        range = range.to_i
-
-        nav = if code == 2
-                NDB.new(coord, alt, mhz, range, id, name)
-              else
-                VOR.new(coord, alt, freq, range, mp.to_f.rad, id, name)
-              end
-
-        hsh[id] ||= []
-        hsh[id].push nav
-      when 99
-        break
-      else
-        raise "Unexpected code in nav.dat (#{l})"
+        Fix.new(:lat => lat, :lon => lon, :ident => ident).save
       end
+
+      f.close
     end
-
-    f.close
-    hsh
-  end
-
-  # As with parse_apt, but for fix.dat
-  def self.parse_fix(fn, hsh={})
-    f = File.open(fn)
-    gz = Zlib::GzipReader.new(f) rescue nil
-    gz ||= f
-
-    gz.readline =~ /^[IA]/i or raise "Expected filetype marker in fix.dat"
-    gz.readline =~ /^600 Version/i or raise "I only know verson 600 of fix.dat"
-
-    gz.each_line do |l|
-      l.strip!
-      next if l =~ /^\s*$/
-      break if l =~ /^99\s*$/
-      lat, lon, id = l.split
-      coord = [lat.to_f.rad, lon.to_f.rad].coord
-
-      hsh[id] ||= []
-      hsh[id].push Fix.new(coord, id)
-    end
-
-    f.close
-    hsh
   end
 end

@@ -1,21 +1,27 @@
 require 'test/unit'
-require 'aviation/checkpoint'
+require 'lindbergh'
 
 class DataTest < Test::Unit::TestCase
+  include Aviation
+  def setup
+    db = "test/lindbergh.db"
+    File.delete(db) if File.exist?(db)
+    ActiveRecord::Base.logger = Logger.new "test/log"
+    Checkpoint.open("test/lindbergh.db",true)
+  end
+
   def test_data
     t1 = Time.now
     print "Parsing..."
     print "apt..."; $stdout.flush
-    hsh = Aviation.parse_apt("data/apt.dat.gz")
+    Checkpoint.parse_apt("test/apt.dat.gz")
     print "nav..."; $stdout.flush
-    hsh = Aviation.parse_nav("data/nav.dat.gz",hsh)
+    Checkpoint.parse_nav("test/nav.dat.gz")
     print "fix..."; $stdout.flush
-    hsh = Aviation.parse_fix("data/fix.dat.gz",hsh)
+    Checkpoint.parse_fix("test/fix.dat.gz")
     puts "#{Time.now-t1} seconds."
 
-    assert_instance_of Aviation::Airport, hsh['KLRU'].first
-    assert_instance_of Aviation::VOR, hsh['AAL'].first
-    assert_instance_of Aviation::Fix, hsh['VPPTM'].first
+    assert_instance_of Aviation::Airport, Airport.find_by_ident('KLRU')
   end
 end
 

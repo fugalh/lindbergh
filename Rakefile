@@ -22,7 +22,7 @@ end
 desc 'clean up'
 task :clean do
   sh 'ruby setup.rb clean'
-  sh 'rm -rf doc lib/lindbergh/plan.tab.rb'
+  sh 'rm -rf doc lib/lindbergh/parser.tab.rb'
 end
 
 task :dist do
@@ -30,9 +30,9 @@ task :dist do
 end
 
 desc 'racc'
-task :racc => ['lib/lindbergh/plan.tab.rb']
-file 'lib/lindbergh/plan.tab.rb' => ['lib/lindbergh/plan.y'] do
-  sh 'cd lib/lindbergh; racc plan.y'
+task :racc => ['lib/lindbergh/parser.tab.rb']
+file 'lib/lindbergh/parser.tab.rb' => ['lib/lindbergh/parser.y'] do
+  sh 'cd lib/lindbergh; racc parser.y'
 end
 
 require 'rake/testtask'
