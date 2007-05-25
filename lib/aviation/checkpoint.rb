@@ -1,6 +1,7 @@
 require 'lindbergh'
 require 'zlib'
 require 'active_record'
+require 'pathname'
 
 # this is an ugly, ugly hack in response to an ugly, ugly bug.
 class ActiveRecord::Base
@@ -176,6 +177,14 @@ module Aviation
   class Heliport < Airport; end
 
   class Checkpoint
+
+    # Parse {apt,nav,fix}.dat.gz under path
+    def self.parse(path)
+      path = Pathname.new(path) unless path.is_a? Pathname
+      self.parse_apt(path+"apt.dat.gz")
+      self.parse_nav(path+"nav.dat.gz")
+      self.parse_fix(path+"fix.dat.gz")
+    end
 
     # Parse apt.dat{,.gz} given a filename. An ActiveRecord connection to a
     # database is required.

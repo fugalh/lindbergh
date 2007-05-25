@@ -35,6 +35,12 @@ file 'lib/lindbergh/parser.tab.rb' => ['lib/lindbergh/parser.y'] do
   sh 'cd lib/lindbergh; racc parser.y'
 end
 
+task :db => ['data/lindbergh.db']
+# XXX why doesn't this skip when the data files haven't changed?
+task ['data/lindbergh.db'] => %w{apt nav fix}.map{|f| "extra/#{f}.dat.gz"} do
+  sh 'ruby -Ilib -Iext/magvar bin/lindbergh -r extra -d data/lindbergh.db'
+end
+  
 require 'rake/testtask'
 Rake::TestTask.new do |t|
   t.libs += ['ext/magvar']

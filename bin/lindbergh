@@ -1,9 +1,23 @@
-#!/opt/local/bin/ruby
+#! /opt/local/bin/ruby
 require 'lindbergh'
+require 'optparse'
+require 'ostruct'
+require 'pathname'
 
-# for now, just build the db
-db = 'data/lindbergh.db'
-Aviation::Checkpoint.open(db, true) # replace that db
-Aviation::Checkpoint.parse_apt('data/apt.dat.gz')
-Aviation::Checkpoint.parse_nav('data/nav.dat.gz')
-Aviation::Checkpoint.parse_fix('data/fix.dat.gz')
+opts = OpenStruct.new(:db => Pathname.new("data/lindbergh.db"))
+OptionParser.new do |o|
+  o.banner = "usage: #{$0} [options] flight_plan.txt"
+  o.on("-f", "--database=PATH", "Lindbergh database to use") do |v| 
+    opts.db = Pathname.new(v)
+  end
+  o.on("-r", "--rebuild=PATH", "Rebuild the database,", 
+       "using PATH/{apt,nav,fix}.dat.gz") do |v| 
+    opts.rebuild = true; opts.rebuild_path = Pathname.new(v)
+  end
+  o.on("-h", "--help") { puts o; exit }
+end.parse!
+
+if opts.rebuild
+  Aviation::Checkpoint.open(opts.db, true)
+  Aviation::Checkpoint.parse(opts.rebuild_path)
+end
