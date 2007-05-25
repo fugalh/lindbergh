@@ -1,0 +1,9 @@
+#!/opt/local/bin/ruby
+require 'lindbergh'
+
+# for now, just build the db
+db = 'data/lindbergh.db'
+Aviation::Checkpoint.open(db, true) # replace that db
+Aviation::Checkpoint.parse_apt('data/apt.dat.gz')
+Aviation::Checkpoint.parse_nav('data/nav.dat.gz')
+Aviation::Checkpoint.parse_fix('data/fix.dat.gz')
