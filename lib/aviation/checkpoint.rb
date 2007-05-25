@@ -19,7 +19,13 @@ module Aviation
 
   class Checkpoint < ActiveRecord::Base
     include LatLon
+    # Open dbfile. If init is true, (re)initialize the database (losing all
+    # data)
     def self.open(dbfile, init=false)
+      if init
+        File.delete(dbfile) if File.exist?(dbfile)
+      end
+
       ActiveRecord::Base.establish_connection(:adapter => 'sqlite3',
                                               :database => dbfile)
 
@@ -38,7 +44,7 @@ module Aviation
           end
           add_index :checkpoints, :ident
           create_table :towers do |t|
-            t.column :checkpoint_id, :integer
+            t.column :airport_id, :integer
             t.column :lat, :float
             t.column :lon, :float
           end
@@ -142,6 +148,7 @@ module Aviation
 
     class Tower < ActiveRecord::Base; 
       set_table_name "towers"
+      belongs_to :airport
       include LatLon
     end
 
