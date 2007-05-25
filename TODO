@@ -1,0 +1,13 @@
+more thorough db generation tests
+more thorough parsing tests
+plan calculations
+    - TC
+    - MC (variation)
+    - MH (wind)
+    - ground speed
+    - time
+    - fuel usage
+    - altitude/temperature stuff
+text output
+html output
+pdf output?
