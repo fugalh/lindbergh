@@ -8,7 +8,7 @@ end
 
 desc "RDoc documentation"
 task :doc do
-  sh "rdoc -t #{Name} -m README README lib"
+  sh "rdoc -t #{Name} -m README README lib ext"
 end
 
 file '.config' do
