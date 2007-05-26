@@ -9,62 +9,62 @@ plan: # nil
     ;
 
 statement: fromviato checkpoint 
-         { @plan.push Waypoint::Checkpoint.new(val[1]) }
+         { add_waypoint Waypoint::Checkpoint.new(val[1]) }
 
          | fromviato checkpoint radial checkpoint radial ncc 
-         { @plan.push Waypoint::Intersection.new(*val[1..5]) }
+         { add_waypoint Waypoint::Intersection.new(*val[1..5]) }
 
          | fromviato checkpoint dir '/' dist ncc
-         { @plan.push Waypoint::RNAV.new(val[1], val[2], val[4], val[5]) }
+         { add_waypoint Waypoint::RNAV.new(val[1], val[2], val[4], val[5]) }
 
          # flattened due to shift/reduce conflict
          | 'from' latlon ncc
-         { @plan.push Waypoint::Waypoint.new(*val[1..2]) }
-         | 'viat' latlon ncc
-         { @plan.push Waypoint::Waypoint.new(*val[1..2]) }
+         { add_waypoint Waypoint::Waypoint.new(*val[1..2]) }
+         | 'via' latlon ncc
+         { add_waypoint Waypoint::Waypoint.new(*val[1..2]) }
          | 'to' latlon ncc
-         { @plan.push Waypoint::Waypoint.new(*val[1..2]) }
+         { add_waypoint Waypoint::Waypoint.new(*val[1..2]) }
 
          | 'via' dist ncc
-         { @plan.push Waypoint::Incremental.new(*val[1..2]) }
+         { add_waypoint Waypoint::Incremental.new(*val[1..2]) }
          | 'to' dist ncc
-         { @plan.push Waypoint::Incremental.new(*val[1..2]) }
+         { add_waypoint Waypoint::Incremental.new(*val[1..2]) }
 
          | 'climb' alt climb_rate
-         { @plan.push Waypoint::Climb.new(*val[1..2]) }
+         { add_waypoint Waypoint::Climb.new(*val[1..2]) }
 
          | descend alt climb_rate
-         { @plan.push Waypoint::Descend.new(*val[1..2]) }
+         { add_waypoint Waypoint::Descend.new(*val[1..2]) }
 
          | fuel_amount fuel_qty
-         { @plan.last.fuel_amount = val[1] }
+         { @leg.fuel_amount = val[1] }
 
          | fuel_rate number
-         { @plan.last.fuel_rate = val[1] }
+         { @leg.fuel_rate = val[1] }
 
          | fuel_used fuel_qty
-         { @plan.last.fuel_used = val[1] }
+         { @leg.fuel_used = val[1] }
 
          | 'alt' alt
-         { @plan.last.alt = val[1] }
+         { @leg.alt = val[1] }
 
          | 'comment' str
-         { @plan.last.comment = val[1] }
+         { @leg.comment = val[1] }
 
          | 'nav' number vor
-         { @plan.last.nav[val[1]-1] = val[2] }
+         { @leg.nav[val[1]-1] = val[2] }
 
          | 'ias' speed
-         { @plan.last.ias = val[1] }
+         { @leg.ias = val[1] }
 
          | 'tas' speed
-         { @plan.last.tas = val[1] }
+         { @leg.tas = val[1] }
 
          | 'temp' temp
-         { @plan.last.temp = val[1] }
+         { @leg.temp = val[1] }
 
          | 'wind' dir '@' speed
-         { @plan.last.temp = [val[1], val[2]] }
+         { @leg.temp = [val[1], val[2]] }
          ;
 
 vor: checkpoint { error "Expected a VOR" unless VOR === val[0] }
@@ -72,7 +72,7 @@ vor: checkpoint { error "Expected a VOR" unless VOR === val[0] }
 
 checkpoint: ident 
           { 
-            coord = @plan.last.coord unless @plan.empty?
+            coord = @leg.coord unless @leg.nil?
             result = Aviation::Checkpoint.closest(coord, val[0].upcase)
           }
           ;
@@ -94,9 +94,9 @@ dir: number deg { result = val[0].rad }
    ;
 
 ncc: 
-   | name { result = [val[0],nil,nil] }
-   | name city { result = [val[0],val[1],nil] }
-   | name city comment { result = val }
+   | name               { result = [val[0],nil,nil] }
+   | name city          { result = [val[0],val[1],nil] }
+   | name city comment  { result = val[0..2] }
    ;
 
 name: str
@@ -138,9 +138,9 @@ lon: ordinate
 
 ordinate: number
         | number rad
-        | number deg { val[0,1].rad }
-        | number deg number "'" { [val[0], val[2]].rad }
-        | number deg number "'" number '\"' { [val[0], val[2], val[4]].rad }
+        | number deg                            { val[0,1].rad }
+        | number deg number "'"                 { [val[0], val[2]].rad }
+        | number deg number "'" number '\"'     { [val[0], val[2], val[4]].rad }
         ;
 
 north: 'n' | 'N'

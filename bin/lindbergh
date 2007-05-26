@@ -11,7 +11,7 @@ OptionParser.new do |o|
     opts.db = Pathname.new(v)
   end
   o.on("-r", "--rebuild=PATH", "Rebuild the database,", 
-       "using PATH/{apt,nav,fix}.dat.gz") do |v| 
+       "using PATH/{apt,nav,fix}.dat.gz","(no flight plan)") do |v| 
     opts.rebuild = true; opts.rebuild_path = Pathname.new(v)
   end
   o.on("-h", "--help") { puts o; exit }
@@ -20,4 +20,7 @@ end.parse!
 if opts.rebuild
   Aviation::Checkpoint.open(opts.db, true)
   Aviation::Checkpoint.parse(opts.rebuild_path)
+else
+  Aviation::Checkpoint.open(opts.db, false)
+  p PlanParser.new.parse(ARGF.read)
 end

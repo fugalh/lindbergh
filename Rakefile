@@ -1,5 +1,5 @@
 Name="lindbergh"
-task :default => [:test, :doc]
+task :default => [:doc, :test]
 
 task :install => [:setup] do
   sh 'ruby setup.rb install'
@@ -7,7 +7,7 @@ end
 
 
 desc "RDoc documentation"
-task :doc do
+task :doc => [:clean] do
   sh "rdoc -t #{Name} -m README README lib ext"
 end
 
@@ -35,6 +35,7 @@ file 'lib/lindbergh/parser.tab.rb' => ['lib/lindbergh/parser.y'] do
   sh 'cd lib/lindbergh; racc parser.y'
 end
 
+desc 'rebuild database'
 task :db => ['data/lindbergh.db']
 # XXX why doesn't this skip when the data files haven't changed?
 task ['data/lindbergh.db'] => %w{apt nav fix}.map{|f| "extra/#{f}.dat.gz"} do

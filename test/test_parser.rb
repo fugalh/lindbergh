@@ -10,11 +10,13 @@ class ParserTest < Test::Unit::TestCase
     pf = @parser.parse "from klru; to ktcs;"
     assert_equal 1, pf.plans.size
     plan = pf.plans.first
-    assert_equal 2, plan.size
-    a,b = plan[0..1].map {|w| w.checkpoint}
-    assert_instance_of Aviation::Airport, a
-    assert_equal 'KLRU', a.ident
-    assert_instance_of Aviation::Airport, b
-    assert_equal 'KTCS', b.ident
+    assert_equal 1, plan.size # one leg
+    leg = plan.first
+    a = leg.from
+    b = leg.to
+    assert_instance_of Waypoint::Checkpoint, a
+    assert_equal 'KLRU', a.cp.ident
+    assert_instance_of Waypoint::Checkpoint, b
+    assert_equal 'KTCS', b.cp.ident
   end
 end

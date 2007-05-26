@@ -130,6 +130,7 @@ module Aviation
         sum / ary.size
       end
 
+      save # doesn't work if we don't save first
       self.coord = if tower
                      tower.coord
                    elsif beacons.size > 0
@@ -155,8 +156,8 @@ module Aviation
 
     class Runway < ActiveRecord::Base
       set_table_name "runways"
-      include LatLon
       belongs_to :airport
+      include LatLon
       alias :center :coord
       alias :center= :coord=
     end
@@ -169,6 +170,7 @@ module Aviation
     class Beacon < ActiveRecord::Base
       set_table_name "beacons"
       belongs_to :airport
+      include LatLon
     end
   end
 
@@ -246,7 +248,8 @@ module Aviation
 
         when 18
           lat, lon, color, name = l.split(' ', 4)
-          coord = [lat.to_f.rad, lon.to_f.rad].coord
+          lat = lat.to_f.rad
+          lon = lon.to_f.rad
           color = color.to_i
           apt.beacons.create(:lat => lat, :lon => lon, :color => color, 
                              :name => name)

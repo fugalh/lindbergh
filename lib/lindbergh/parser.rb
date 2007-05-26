@@ -1,5 +1,5 @@
 require 'lindbergh/plan'
-require 'lindbergh/waypoint'
+require 'lindbergh/leg'
 require 'lindbergh/parser.tab'
 require 'ruby-units'
 
@@ -101,8 +101,13 @@ class PlanParser
     consume($&||"")
     [tok, val]
   end
-end
 
-if $0 == __FILE__
-  puts PlanParser.new.parse(ARGF.read).inspect
+  def add_waypoint(wp)
+    unless @leg.nil?
+      @leg.to = wp
+      @plan.push @leg
+    end
+    @leg = Leg.new(:from => wp)
+  end
+
 end

@@ -32,6 +32,7 @@ module Waypoint
 
   class Checkpoint < Waypoint
     attr_reader :checkpoint
+    alias :cp :checkpoint
     def initialize(cp)
       @checkpoint = cp
       super cp.coord, nil
