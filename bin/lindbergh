@@ -3,6 +3,7 @@ require 'lindbergh'
 require 'optparse'
 require 'ostruct'
 require 'pathname'
+require 'yaml'
 
 opts = OpenStruct.new(:db => Pathname.new("data/lindbergh.db"))
 OptionParser.new do |o|
@@ -22,5 +23,5 @@ if opts.rebuild
   Aviation::Checkpoint.parse(opts.rebuild_path)
 else
   Aviation::Checkpoint.open(opts.db, false)
-  p PlanParser.new.parse(ARGF.read)
+  puts PlanParser.new.parse(ARGF.read).to_yaml
 end

@@ -65,7 +65,7 @@ class PlanParser
                  :fuel_rate
                when /\A(fuel(_|\s+)used)\b/
                  :fuel_used
-               when /\A(\d+[\.\d+])/
+               when /\A(\d+(\.\d+)?)/
                  [:number, $1.to_f]
                when /\A(smi?|mi(les?)?)\b/
                  [:sm, "miles"]
