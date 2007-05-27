@@ -47,7 +47,7 @@ class PlanParser
 
   def next_token
     # skip comments and whitespace
-    skip(/\s+|(#[^\n]$)+/m)
+    skip(/\s+|(#[^\n]*$\n?)+/m)
     return [false, false] if @input.empty?
 
     tok, val = case @input
