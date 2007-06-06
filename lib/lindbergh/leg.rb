@@ -26,8 +26,12 @@ class Leg < OpenStruct
   end
   def egs
     return nil if tas.nil?
-    wdir, wkts = wind
-    tas * Math.cos(wca) + wkts * Math.cos(tc - wdir + Math::PI)
+    if wind.nil?
+      tas
+    else
+      wdir, wkts = wind
+      tas * Math.cos(wca) + wkts * Math.cos(tc - wdir + Math::PI)
+    end
   end
   def ete
     return nil if egs.nil?

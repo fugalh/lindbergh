@@ -12,8 +12,8 @@ class Plan < Array
   # Calculate totd, remd, fleg, frem for each leg
   def calc
     # carry over variables
-    var = %w(alt temp wind tc dev tas flow)
-    var.each {|v| instance_eval "#{v} = self.first.#{v}"}
+    vbl = %w(alt temp wind tc dev tas flow)
+    vbl.each {|v| instance_eval "#{v} = self.first.#{v}"}
     totd = '0 nmi'.u
     remd = self.inject('0 nmi'.u) {|s,l| s + l.legd}
     eta = "0 sec".u
@@ -30,10 +30,10 @@ class Plan < Array
         l.eta = eta
       end
 
-      var.each do |v| 
+      vbl.each do |v| 
         instance_eval "#{v} = l.#{v} || #{v}; l.#{v} = #{v}"
       end
-      l.fleg = l.flow * ete unless ete.nil?
+      l.fleg = l.flow * ete unless ete.nil? or l.flow.nil?
     end
   end
 end

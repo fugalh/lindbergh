@@ -24,7 +24,11 @@ end
 class Leg
   def sec2clock(seconds)
     a,b = seconds.divmod(60)
-    sprintf("%s:%s",a,b.to_i)
+    if a == 0
+      sprintf(":%02d",b.to_i)
+    else
+      sprintf("%d:%02d",a,b.to_i)
+    end
   end
   def prec(f, p)
     sprintf("%.#{p}f",f)
@@ -53,7 +57,7 @@ class Leg
     dev = self.dev && self.dev.deg.round
     totd = prec(self.totd.to('nmi').abs, 1)
     egs = self.egs && self.egs.to('knots').abs.round
-    ete = self.ete && min2clock(self.ete.to('minutes'))
+    eta = self.ete && min2clock(self.ete.to('minutes').abs)
     ata = nil
     fleg = self.fleg && prec(self.fleg.to('gallons/hour').abs, 1)
 

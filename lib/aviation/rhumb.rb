@@ -28,6 +28,7 @@ module Aviation
       # equation 2, bearing from coord1 to coord2 from north
       theta = acot(ds/dl)
       theta += Math::PI if lat2 < lat1 # if southbound
+      theta %= 2*Math::PI
       r = R * (lat2-lat1).abs / Math.cos(theta).abs
 
       [r, theta]
