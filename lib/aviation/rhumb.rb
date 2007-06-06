@@ -1,5 +1,4 @@
 require 'aviation/coordinate'
-require 'narray' # for acot
 require 'ruby-units'
 
 module Aviation
@@ -27,7 +26,7 @@ module Aviation
       end
 
       # equation 2, bearing from coord1 to coord2 from north
-      theta = NMath::acot(ds/dl)
+      theta = acot(ds/dl)
       theta += Math::PI if lat2 < lat1 # if southbound
       r = R * (lat2-lat1).abs / Math.cos(theta).abs
 
@@ -39,6 +38,10 @@ module Aviation
       esinl = Eccentricity * Math.sin(l)
       Math.log(1/Math.cos(l) + Math.tan(l)) - 
         (Eccentricity/2) * Math.log((1 + esinl) / (1 - esinl))
+    end
+
+    def self.acot(x)
+      Math.atan(1.0/x)
     end
   end
 end
