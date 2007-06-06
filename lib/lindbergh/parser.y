@@ -11,23 +11,23 @@ plan: # nil
 statement: fromviato checkpoint 
          { add_waypoint Waypoint::Checkpoint.new(val[1]) }
 
-         | fromviato checkpoint radial checkpoint radial ncc 
+         | fromviato checkpoint radial checkpoint radial comment 
          { add_waypoint Waypoint::Intersection.new(*val[1..5]) }
 
-         | fromviato checkpoint dir '/' dist ncc
+         | fromviato checkpoint dir '/' dist comment
          { add_waypoint Waypoint::RNAV.new(val[1], val[2], val[4], val[5]) }
 
          # flattened due to shift/reduce conflict
-         | 'from' latlon ncc
+         | 'from' latlon comment
          { add_waypoint Waypoint::Waypoint.new(*val[1..2]) }
-         | 'via' latlon ncc
+         | 'via' latlon comment
          { add_waypoint Waypoint::Waypoint.new(*val[1..2]) }
-         | 'to' latlon ncc
+         | 'to' latlon comment
          { add_waypoint Waypoint::Waypoint.new(*val[1..2]) }
 
-         | 'via' dist ncc
+         | 'via' dist comment
          { add_waypoint Waypoint::Incremental.new(*val[1..2]) }
-         | 'to' dist ncc
+         | 'to' dist comment
          { add_waypoint Waypoint::Incremental.new(*val[1..2]) }
 
          | 'climb' alt climb_rate
@@ -80,7 +80,7 @@ checkpoint: ident
 fromviato: 'from' 
    { 
      @plan = Plan.new
-     @pf.plans.push @plan
+     @pf.push @plan
    }
    | 'via' | 'to'
    ;
@@ -93,17 +93,6 @@ dir: number deg { result = val[0].rad }
    | number
    ;
 
-ncc: 
-   | name               { result = [val[0],nil,nil] }
-   | name city          { result = [val[0],val[1],nil] }
-   | name city comment  { result = val[0..2] }
-   ;
-
-name: str
-    ;
-
-city: str
-    ;
 
 comment: str
        ;
@@ -122,16 +111,14 @@ speed: number            { result = 'kts'.u * val[0] }
 speed_unit: mph|kts|kph|fps|mps
           ;
 
-latlon: lat ',' lon { result = [val[0], val[1]].coord }
+latlon: lat lon { result = [val[0], val[1]].coord }
       ;
 
-lat: ordinate
-   | ordinate north
+lat: ordinate north
    | ordinate south { result = -val[0] }
    ;
 
-lon: ordinate
-   | ordinate east
+lon: ordinate east
    | ordinate west  { result = -val[0] }
    ;
 

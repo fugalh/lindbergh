@@ -3,30 +3,30 @@ require 'lindbergh'
 module Waypoint
   class Waypoint
     attr_reader :coord, :name, :city, :comment
-    def initialize(coord, ncc)
+    def initialize(coord, comment)
       @coord = coord
-      @name, @city, @comment = ncc
+      @comment = comment
     end
   end
 
   class Intersection < Waypoint
     attr_reader :checkpoints, :radials
-    def initialize(cp1, radial1, cp2, radial2, ncc)
+    def initialize(cp1, radial1, cp2, radial2, comment)
       @checkpoints = [cp1, cp2]
       @radials = [radial1, radial2]
       coord = cp1.coord # TODO
-      super coord, ncc
+      super coord, comment
     end
   end
 
   class RNAV < Waypoint
     attr_reader :checkpoint, :dir, :dist
-    def initialize(cp, dir, dist, ncc)
+    def initialize(cp, dir, dist, comment)
       @checkpoint = cp
       @dir = dir
       @dist = dist
       coord = cp.coord # TODO
-      super coord, ncc
+      super coord, comment
     end
   end
 
@@ -37,13 +37,17 @@ module Waypoint
       @checkpoint = cp
       super cp.coord, nil
     end
+    def name
+      @checkpoint.ident
+    end
+    alias :ident :name
   end
 
   class Incremental < Waypoint
     attr_reader :dist
-    def initialize(dist, ncc)
+    def initialize(dist, comment)
       coord = nil # TODO
-      super coord, ncc
+      super coord, comment
     end
   end
 

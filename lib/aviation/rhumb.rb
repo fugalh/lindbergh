@@ -1,10 +1,12 @@
 require 'aviation/coordinate'
+require 'narray' # for acot
+require 'ruby-units'
 
 module Aviation
   # [1] http://www.cwru.edu/artsci/math/alexander/mathmag349-356.pdf
   module Rhumb
     Eccentricity = 0.081
-    R = 6378.155 # km
+    R = "6378.155 km".u
 
     # coord[12]:: Aviation::Coordinate
     # Returns a polar vector [r, theta] (km, radians)
@@ -24,7 +26,8 @@ module Aviation
         dl += 2*Math::PI
       end
 
-      theta = acot(ds/dl)
+      # equation 2, bearing from coord1 to coord2 from north
+      theta = NMath::acot(ds/dl)
       r = R * (lat2-lat1).abs / Math.cos(theta).abs
 
       [r, theta]
@@ -35,11 +38,6 @@ module Aviation
       esinl = Eccentricity * Math.sin(l)
       Math.log(1/Math.cos(l) + Math.tan(l)) - 
         (Eccentricity/2) * Math.log((1 + esinl) / (1 - esinl))
-    end
-
-    # arc cotangent
-    def self.acot(x)
-      Math::PI / 2 - Math.atan(x)
     end
   end
 end

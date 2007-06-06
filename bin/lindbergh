@@ -23,5 +23,7 @@ if opts.rebuild
   Aviation::Checkpoint.parse(opts.rebuild_path)
 else
   Aviation::Checkpoint.open(opts.db, false)
-  puts PlanParser.new.parse(ARGF.read).to_yaml
+  pf = PlanParser.new.parse(ARGF.read)
+
+  pf.each {|p| puts p.to_s}
 end

@@ -1,7 +1,5 @@
-require 'lindbergh/plan'
-require 'lindbergh/leg'
+require 'lindbergh'
 require 'lindbergh/parser.tab'
-require 'ruby-units'
 
 class PlanParser
   attr_reader :line, :column
@@ -13,19 +11,27 @@ class PlanParser
     @yydebug = true
     @errors = []
     do_parse
-    if @errors.empty?
-      return @pf
-    else
+    unless @errors.empty?
       @errors.each {|e| 
         err_io.puts "line #{e.line} column #{e.column}: #{e.msg}" 
       }
       return nil
     end
+    @pf.calc
   end
 
   def error(msg)
     e = OpenStruct.new :msg => msg, :line => @line, :column => @column
     @errors.push e
+  end
+
+  def on_error(t, val, vstack)
+    @errors.each {|e| 
+      err_io.puts "line #{e.line} column #{e.column}: #{e.msg}" 
+    }
+    raise ParseError, sprintf("\nparse error on line %s column %s value %s (%s)\n",
+                              @line, @column,
+                              val.inspect, token_to_str(t) || '?')
   end
 
   def skip(regex)
@@ -47,16 +53,16 @@ class PlanParser
 
   def next_token
     # skip comments and whitespace
-    skip(/\s+|(#[^\n]*$\n?)+/m)
+    skip(/(\s|(#[^\n]*$\n?))+/m)
     return [false, false] if @input.empty?
 
     tok, val = case @input
-               when /\A(("[^"]*")|('[^']*'))/
+               when /\A(\([^)]*\))/
                  [:str, $1]
                when /\A([;\/@'"]|(from|via|to|climb|alt|comment|nav|[it]as|wind)\b)/
                  [$1, $1]
                when /\A(deg(rees?)?\b|°)/
-                 :deg
+                 [:deg, $&]
                when /\A(rad(s|ians)?)\b/
                  :rad
                when /\A(fuel((_|\s+)(amt|amount))?)\b/
@@ -109,5 +115,4 @@ class PlanParser
     end
     @leg = Leg.new(:from => wp)
   end
-
 end

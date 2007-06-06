@@ -3,3 +3,4 @@ requirements:
 - ruby-units[http://rubyforge.org/projects/ruby-units/]
 - sqlite3-ruby[http://rubyforge.org/projects/sqlite-ruby/]
 - ActiveRecord[http://rubyforge.org/projects/activerecord/]
+- NArray[http://narray.rubyforge.org/]

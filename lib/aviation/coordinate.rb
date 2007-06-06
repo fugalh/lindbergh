@@ -68,18 +68,18 @@ module Aviation
       [@lat, @lon]
     end
 
-    # Rhumb [distance, bearing] from here to there
+    # Rhumb [distance (Unit), bearing (radians)] from here to there
     def rhumb(there)
       Rhumb.vector(self, there)
     end
 
-    # Rhumb distance from here to there
+    # Rhumb distance from here to there (Unit)
     def distance(there)
       rhumb(there).first
     end
     alias :dist :distance
 
-    # Rhumb bearing from here to there
+    # Rhumb bearing from here to there (radians)
     def bearing(there)
       rhumb(there).last
     end
@@ -88,7 +88,9 @@ module Aviation
     # level, and Julian date
     def variation(alt=0, jd=Date.today.jd)
       var, dip = MagVar.vardip(@lat, @lon, alt*1000, jd)
+      var
     end
+    alias :var :variation
 
     # String representation, like  32°19.298'N 106°44.762'W
     def to_s

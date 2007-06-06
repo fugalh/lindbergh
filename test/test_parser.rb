@@ -8,8 +8,8 @@ class ParserTest < Test::Unit::TestCase
 
   def test_fromto
     pf = @parser.parse "from klru; to ktcs;"
-    assert_equal 1, pf.plans.size
-    plan = pf.plans.first
+    assert_equal 1, pf.size
+    plan = pf.first
     assert_equal 1, plan.size # one leg
     leg = plan.first
     a = leg.from

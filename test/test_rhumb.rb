@@ -16,7 +16,7 @@ class RhumbTest < Test::Unit::TestCase
       # test within 1% because apparently he uses the spherical approach in
       # doing his calculations and we use the elliptical one.
       dist, bearing = Rhumb.vector(nyc, coord)
-      assert_in_delta 1, dist/ex, 0.01, c
+      assert_in_delta 1, dist.to('km').abs/ex, 0.01, c
     end
   end
   def test_bearing
