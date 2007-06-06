@@ -64,7 +64,7 @@ statement: fromviato checkpoint
          { @leg.temp = val[1] }
 
          | 'wind' dir '@' speed
-         { @leg.temp = [val[1], val[2]] }
+         { @leg.wind = [val[1], val[3]] }
          ;
 
 vor: checkpoint { error "Expected a VOR" unless VOR === val[0] }
@@ -90,7 +90,7 @@ radial: dir
 
 dir: number deg { result = val[0].rad }
    | number rad
-   | number
+   | number { result = val[0].rad }
    ;
 
 

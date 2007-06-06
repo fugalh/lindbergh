@@ -9,12 +9,13 @@ class Leg < OpenStruct
     from.coord.bearing(to.coord)
   end
   def var
-    -from.coord.var(alt || 0)
+    -from.coord.var(alt.to('ft').scalar || 0)
   end
   def wca
     return nil if wind.nil? or tas.nil?
-    wdir, wkts = wind
-    Math.asin(wkts*Math.sin(tc - wdir + Math::PI)/tas)
+    wd, ws = wind
+    xw = Math.sin(wd-tc)*ws # crosswind component
+    (xw/tas).to_f
   end
   def mh
     wca2 = wca || 0
@@ -29,8 +30,9 @@ class Leg < OpenStruct
     if wind.nil?
       tas
     else
-      wdir, wkts = wind
-      tas * Math.cos(wca) + wkts * Math.cos(tc - wdir + Math::PI)
+      wd, ws = wind
+      wd += Math::PI
+      tas * Math.cos(wca) + ws * Math.cos(wd-tc)
     end
   end
   def ete

@@ -13,7 +13,8 @@ class Plan < Array
   def calc
     # carry over variables
     vbl = %w(alt temp wind tc dev tas flow)
-    vbl.each {|v| instance_eval "#{v} = self.first.#{v}"}
+    carry = {}
+    vbl.each {|v| carry[v] = self.first.send(v)}
     totd = '0 nmi'.u
     remd = self.inject('0 nmi'.u) {|s,l| s + l.legd}
     eta = "0 sec".u
@@ -31,7 +32,8 @@ class Plan < Array
       end
 
       vbl.each do |v| 
-        instance_eval "#{v} = l.#{v} || #{v}; l.#{v} = #{v}"
+        carry[v] = l.send(v) || carry[v]
+        l.send(v + '=', carry[v])
       end
       l.fleg = l.flow * ete unless ete.nil? or l.flow.nil?
     end
