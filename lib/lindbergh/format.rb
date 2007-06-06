@@ -7,8 +7,8 @@ class Plan
   def to_s
     s = StringIO.new
     s.print <<-EOF
-Checkpoint                         Alt   TC   MH  TotD  TAS   ETE   ATE   Flow
-Latitude and Longitude            Temp  Var  Dev  LegD  EGS   ETA   ATA   FLeg
+Checkpoint                         Alt   TC   MH  LegD  TAS   ETE   ATE   Flow
+Latitude and Longitude            Temp  Var  Dev  TotD  EGS   ETA   ATA   FLeg
 Navaid fixes                      Wind  WCA   CH  RemD  AGS               FRem
 ------------------------------------------------------------------------------
     EOF
