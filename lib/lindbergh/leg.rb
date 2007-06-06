@@ -9,7 +9,8 @@ class Leg < OpenStruct
     from.coord.bearing(to.coord)
   end
   def var
-    -from.coord.var(alt.to('ft').scalar || 0)
+    x = alt || '0 ft'.u
+    -from.coord.var(x.to('ft').scalar)
   end
   def wca
     return nil if wind.nil? or tas.nil?

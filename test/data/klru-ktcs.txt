@@ -1,0 +1,12 @@
+from klru;
+nav 1 tcs;
+#nav 2 svc;
+tas 70;
+fuel_amount 5;
+fuel_rate 4.5;
+alt 6500;
+
+via e05;
+wind 150@5;
+
+to ktcs;

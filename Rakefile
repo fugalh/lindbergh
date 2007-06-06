@@ -32,9 +32,9 @@ end
 desc 'racc'
 task :racc => ['lib/lindbergh/parser.tab.rb']
 file 'lib/lindbergh/parser.tab.rb' => ['lib/lindbergh/parser.y'] do
-  #sh 'cd lib/lindbergh; racc -v -g parser.y'
-  #sh 'cd lib/lindbergh; racc -v parser.y'
   sh 'cd lib/lindbergh; racc parser.y'
+  #sh 'cd lib/lindbergh; racc -v parser.y'
+  #sh 'cd lib/lindbergh; racc -v -g parser.y'
 end
 
 desc 'rebuild database'

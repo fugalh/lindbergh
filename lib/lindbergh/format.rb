@@ -47,7 +47,7 @@ class Leg
     tas = self.tas && self.tas.to('knots').scalar.round
     ete = self.ete && min2clock(self.ete.to('minutes').scalar)
     ate = nil
-    flow = self.flow && prec(self.flow.to('gallons/hour').scalar,1)
+    flow = self.fuel_rate && prec(self.fuel_rate.to('gal/h').scalar,1)
 
     s << sprintf("%38s %4s %4s %5s %4s %5s %5s %6s\n",
                  alt, tc, mh, legd, tas, ete, ate, flow)
@@ -59,7 +59,7 @@ class Leg
     egs = self.egs && self.egs.to('knots').scalar.round
     eta = self.ete && min2clock(self.ete.to('minutes').scalar)
     ata = nil
-    fleg = self.fleg && prec(self.fleg.to('gallons/hour').scalar, 1)
+    fleg = self.fleg && prec(self.fleg.to('gal').scalar, 1)
 
     s << sprintf("%38s %4s %4s %5s %4s %5s %5s %6s\n",
                  temp, var, dev, totd, egs, eta, ata, fleg)
@@ -71,7 +71,7 @@ class Leg
     ch = self.ch && self.ch.deg.round%360
     remd = self.remd && prec(self.remd.to('nmi').scalar, 1)
     ags = nil
-    frem = self.frem && prec(self.frem.to('gallons/hour').scalar, 1)
+    frem = self.frem && prec(self.frem.to('gal').scalar, 1)
 
     s << sprintf("%38s %4s %4s %5s %4s %5s %5s %6s",
                  wind, wca, ch, remd, ags, nil, nil, frem)

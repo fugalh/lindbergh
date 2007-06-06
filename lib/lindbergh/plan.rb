@@ -12,12 +12,13 @@ class Plan < Array
   # Calculate totd, remd, fleg, frem for each leg
   def calc
     # carry over variables
-    vbl = %w(alt temp wind tc dev tas flow)
+    vbl = %w(alt temp wind tc dev tas fuel_rate)
     carry = {}
     vbl.each {|v| carry[v] = self.first.send(v)}
     totd = '0 nmi'.u
     remd = self.inject('0 nmi'.u) {|s,l| s + l.legd}
     eta = "0 sec".u
+    frem = nil
 
     self.each do |l|
       totd += l.legd
@@ -25,17 +26,24 @@ class Plan < Array
       l.totd = totd
       l.remd = remd
 
+      vbl.each do |v| 
+        carry[v] = l.send(v) || carry[v]
+        l.send(v + '=', carry[v])
+      end
+
       ete = l.ete
       unless ete.nil?
         eta += ete
         l.eta = eta
       end
 
-      vbl.each do |v| 
-        carry[v] = l.send(v) || carry[v]
-        l.send(v + '=', carry[v])
+      frem = l.fuel_amount || frem
+      frem -= l.fuel_used unless frem.nil? or l.fuel_used.nil?
+      unless l.fuel_rate.nil? or ete.nil?
+        l.fleg = l.fuel_rate * ete 
+        frem -= l.fleg unless frem.nil?
       end
-      l.fleg = l.flow * ete unless ete.nil? or l.flow.nil?
+      l.frem = frem
     end
   end
 end

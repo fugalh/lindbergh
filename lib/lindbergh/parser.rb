@@ -59,18 +59,18 @@ class PlanParser
     tok, val = case @input
                when /\A(\([^)]*\))/
                  [:str, $1]
-               when /\A([;\/@'"]|(from|via|to|climb|alt|comment|nav|[it]as|wind)\b)/
+               when /\A([;\/@'"]|(from|via|to|climb|alt|comment|nav|[it]as|wind|calm|temp)\b)/
                  [$1, $1]
                when /\A(deg(rees?)?\b|°)/
                  [:deg, $&]
                when /\A(rad(s|ians)?)\b/
                  :rad
-               when /\A(fuel((_|\s+)(amt|amount))?)\b/
-                 :fuel_amount
                when /\A(fuel(_|\s+)rate)\b/
                  :fuel_rate
                when /\A(fuel(_|\s+)used)\b/
                  :fuel_used
+               when /\A(fuel((_|\s+)(amt|amount))?)\b/
+                 :fuel_amount
                when /\A(\d+(\.\d+)?)/
                  [:number, $1.to_f]
                when /\A(smi?|mi(les?)?)\b/

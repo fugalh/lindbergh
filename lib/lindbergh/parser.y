@@ -1,6 +1,6 @@
 class PlanParser
 
-token ident descend fuel_amount fuel_rate fuel_used str deg rad number sm nmi km ft meter mph kts kph fps mps cf to
+token ident descend fuel_amount fuel_rate fuel_used str deg rad number sm nmi km ft meter mph kts kph fps mps cf to 
 
 rule
 
@@ -39,8 +39,8 @@ statement: fromviato checkpoint
          | fuel_amount fuel_qty
          { @leg.fuel_amount = val[1] }
 
-         | fuel_rate number
-         { @leg.fuel_rate = val[1] }
+         | fuel_rate fuel_qty
+         { @leg.fuel_rate = val[1] / 'hour' }
 
          | fuel_used fuel_qty
          { @leg.fuel_used = val[1] }
@@ -65,6 +65,9 @@ statement: fromviato checkpoint
 
          | 'wind' dir '@' speed
          { @leg.wind = [val[1], val[3]] }
+
+         | 'wind' 'calm'
+         { @leg.wind = nil }
          ;
 
 vor: checkpoint { error "Expected a VOR" unless VOR === val[0] }
@@ -146,7 +149,7 @@ alt: number             { result = 'ft'.u * val[0] }
    | number dist_unit   { result = val[1] * val[0] }
    ;
 
-fuel_qty: number
+fuel_qty: number { result = 'gallon'.u * val[0] }
         ;
 
 temp: number            { result = 'tempC'.u * val[0] }
