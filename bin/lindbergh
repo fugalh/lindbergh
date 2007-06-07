@@ -1,4 +1,4 @@
-#! /opt/local/bin/ruby
+#! /usr/bin/ruby1.8
 require 'lindbergh'
 require 'optparse'
 require 'ostruct'
