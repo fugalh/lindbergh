@@ -57,7 +57,7 @@ class Leg
     dev = self.dev && self.dev.deg.round
     totd = prec(self.totd.to('nmi').scalar, 1)
     egs = self.egs && self.egs.to('knots').scalar.round
-    eta = self.ete && min2clock(self.ete.to('minutes').scalar)
+    eta = self.eta && min2clock(self.eta.to('minutes').scalar)
     ata = nil
     fleg = self.fleg && prec(self.fleg.to('gal').scalar, 1)
 
@@ -80,11 +80,38 @@ class Leg
   end
 end
 
-class Waypoint::Waypoint
-  def to_s
-    s = StringIO.new
-    s.puts name
-    s.puts coord
-    s.string
+module Waypoint
+  class Waypoint
+    def to_s
+      s = StringIO.new
+      s.puts name
+      s.puts coord
+      s.string
+    end
+  end
+  class Checkpoint
+    def to_s
+      case @checkpoint 
+      when Aviation::Airport
+        # KLRU
+        # Las Cruces Intl
+        # 4456ft 04/22, 12/30, 08/26
+        # 119.02 AWOS
+        # 122.7  CTAF/UNICOM
+        # 32°17.4'N 106°55.3W
+
+        s = StringIO.new
+        s.puts @checkpoint.ident
+        s.puts @checkpoint.name
+        s.puts sprintf("%dft  %s", @checkpoint.alt, 
+                       @checkpoint.runways.map {|r| r.to_s}.join(", "))
+        @checkpoint.freqs.each {|f| s.puts sprintf("%6.2f  %s", f.mhz, f.name)}
+        s.puts @checkpoint.coord.to_s.strip
+        s.string
+      else
+        super
+      end
+    end
   end
 end
+

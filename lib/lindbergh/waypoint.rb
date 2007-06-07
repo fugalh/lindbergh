@@ -37,10 +37,6 @@ module Waypoint
       @checkpoint = cp
       super cp.coord, nil
     end
-    def name
-      @checkpoint.ident
-    end
-    alias :ident :name
   end
 
   class Incremental < Waypoint

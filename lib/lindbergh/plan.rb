@@ -17,7 +17,7 @@ class Plan < Array
     vbl.each {|v| carry[v] = self.first.send(v)}
     totd = '0 nmi'.u
     remd = self.inject('0 nmi'.u) {|s,l| s + l.legd}
-    eta = "0 sec".u
+    eta = "0 min".u
     frem = nil
 
     self.each do |l|
