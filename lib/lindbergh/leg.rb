@@ -10,7 +10,7 @@ class Leg < OpenStruct
   end
   def var
     x = alt || '0 ft'.u
-    -from.coord.var(x.to('km').scalar)
+    -from.coord.var(x)
   end
   def wca
     return nil if wind.nil? or tas.nil?

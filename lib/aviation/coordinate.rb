@@ -84,10 +84,10 @@ module Aviation
       rhumb(there).last
     end
 
-    # Magnetic Variation, at this lat/lon and altitude in meters above sea
-    # level, and Julian date
-    def variation(alt=0, jd=Date.today.jd)
-      var, dip = MagVar.vardip(@lat, @lon, alt*1000, jd)
+    # Magnetic Variation, at this lat/lon and altitude in height above sea
+    # level (Unit or km), and Julian date
+    def variation(alt='0 ft'.u, jd=Date.today.jd)
+      var, dip = MagVar.vardip(self, alt, jd)
       var
     end
     alias :var :variation

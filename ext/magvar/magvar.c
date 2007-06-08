@@ -27,5 +27,5 @@ void Init_magvar() {
     VALUE flan, mod;
     flan = rb_define_module("Aviation");
     mod = rb_define_module_under(flan, "MagVar");
-    rb_define_module_function(mod, "vardip", vardip, 4);
+    rb_define_module_function(mod, "c_vardip", vardip, 4);
 }
