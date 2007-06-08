@@ -27,7 +27,7 @@ class PlanParser
 
   def on_error(t, val, vstack)
     @errors.each {|e| 
-      err_io.puts "line #{e.line} column #{e.column}: #{e.msg}" 
+      $stderr.puts "line #{e.line} column #{e.column}: #{e.msg}" 
     }
     raise ParseError, sprintf("\nparse error on line %s column %s value %s (%s)\n",
                               @line, @column,

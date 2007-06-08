@@ -42,6 +42,7 @@ module Waypoint
   class Incremental < Waypoint
     attr_reader :dist
     def initialize(dist, comment)
+      raise "Incremental waypoints not yet implemented"
       coord = nil # TODO
       super coord, comment
     end
@@ -50,6 +51,7 @@ module Waypoint
   class Climb < Waypoint
     attr_reader :alt, :rate
     def initialize(alt, rate)
+      raise "Incremental waypoints not yet implemented"
       @alt, @rate = [alt, rate]
       coord = nil # TODO
     end
