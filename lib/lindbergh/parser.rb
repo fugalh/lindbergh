@@ -59,7 +59,7 @@ class PlanParser
     tok, val = case @input
                when /\A(\([^)]*\))/
                  [:str, $1]
-               when /\A([;\/@'"]|(from|via|to|climb|alt|comment|nav|[it]as|wind|calm|temp)\b)/
+               when /\A([;\/@'"]|(from|via|to|climb|alt|nav|[it]as|wind|calm|temp|[nsewNSEW])\b)/
                  [$1, $1]
                when /\A(deg(rees?)?\b|°)/
                  [:deg, $&]
@@ -93,10 +93,6 @@ class PlanParser
                  [:fps, "feet/sec".u]
                when /\A(mps)\b/
                  [:mps, "meters/sec".u]
-               when /\A[NSns]\b/
-                 :ns
-               when /\A[EWew]\b/
-                 :ew
                when /\A[CFcf]\b/
                  :cf
                when /\A(\w+)\b/

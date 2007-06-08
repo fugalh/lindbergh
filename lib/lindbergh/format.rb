@@ -84,8 +84,9 @@ module Waypoint
   class Waypoint
     def to_s
       s = StringIO.new
-      s.puts name
-      s.puts coord
+      s.puts name if name
+      s.puts comment if comment
+      s.puts coord.to_s.strip
       s.string
     end
   end

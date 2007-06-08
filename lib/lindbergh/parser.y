@@ -97,7 +97,8 @@ dir: number deg { result = val[0].rad }
    ;
 
 
-comment: str
+comment:
+       | str { result = val[0][1..-2] }
        ;
 
 dist: number            { result = 'nmi'.u * val[0] }
@@ -126,11 +127,12 @@ lon: ordinate east
    ;
 
 
-ordinate: number
+ordinate: number 		{ result = val[0].rad }
         | number rad
-        | number deg                            { val[0,1].rad }
-        | number deg number "'"                 { [val[0], val[2]].rad }
-        | number deg number "'" number '\"'     { [val[0], val[2], val[4]].rad }
+        | number deg            { result = val[0].rad }
+        | number deg number "'" { result = [val[0], val[2]].rad }
+        | number deg number "'" number '\"' 
+	{ result = [val[0], val[2], val[4]].rad }
         ;
 
 north: 'n' | 'N'
