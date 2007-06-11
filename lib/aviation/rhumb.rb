@@ -44,5 +44,24 @@ module Aviation
     def self.acot(x)
       Math.atan(1.0/x)
     end
+    # coord:: Starting point (Aviation::Coordinate)
+    # r:: distance (Unit)
+    # theta:: bearing (radians)
+    #
+    # Returns the destination coordinate
+    def self.from(coord, r, theta)
+      lat1, lon1 = coord.to_a
+      theta %= 2*PI
+
+      dL = (r * Math.cos(theta) / R).to_base.to_f
+
+      dE = sigma(lat1 + dL) - sigma(lat1)
+      # XXX This breaks down at 90°,180°,270°, because of numerical imprecision
+      # with dE or tan(theta). Figure out a workaround or more numerically
+      # stable equations
+      dl = dE * Math.tan(theta)
+
+      [lat1 + dL, lon1 + dl].coord
+    end
   end
 end

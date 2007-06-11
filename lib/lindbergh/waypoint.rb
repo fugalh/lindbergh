@@ -41,9 +41,16 @@ module Waypoint
 
   class Incremental < Waypoint
     attr_reader :dist
-    def initialize(dist, comment)
-      raise "Incremental waypoints not yet implemented"
-      coord = nil # TODO
+    def initialize(prev_leg, dist, comment)
+      if dist < 0
+        dist = -dist
+        c = prev_leg.to
+        t = prev_leg.tc
+      else
+        c = prev_leg.from
+        t = prev_leg.tc + 180.rad
+      end
+      coord = Aviation::Rhumb.from(c, dist, t)
       super coord, comment
     end
   end
