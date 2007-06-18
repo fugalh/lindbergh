@@ -27,4 +27,27 @@ class RhumbTest < Test::Unit::TestCase
     r, b = Rhumb.vector(klru, kwsd)
     assert_in_delta 1, b.deg/83, 0.01, b.deg
   end
+  def test_from
+    c = [0,0].coord
+    r = '60 nmi'.u
+    assert_in_delta  1, Rhumb.from(c,r, -0.01.rad).lat.deg, 0.01
+    assert_in_delta  1, Rhumb.from(c,r,  0.00.rad).lat.deg, 0.01
+    assert_in_delta  0, Rhumb.from(c,r,  0.00.rad).lon.deg, 0.01
+    assert_in_delta  1, Rhumb.from(c,r,  0.01.rad).lat.deg, 0.01
+    assert_in_delta  1, Rhumb.from(c,r, 89.99.rad).lon.deg, 0.01
+    assert_in_delta  1, Rhumb.from(c,r, 90.00.rad).lon.deg, 0.01
+    assert_in_delta  0, Rhumb.from(c,r, 90.00.rad).lat.deg, 0.01
+    assert_in_delta  1, Rhumb.from(c,r, 90.01.rad).lon.deg, 0.01
+    assert_in_delta -1, Rhumb.from(c,r,179.99.rad).lat.deg, 0.01
+    assert_in_delta -1, Rhumb.from(c,r,180.00.rad).lat.deg, 0.01
+    assert_in_delta  0, Rhumb.from(c,r,180.00.rad).lon.deg, 0.01
+    assert_in_delta -1, Rhumb.from(c,r,180.01.rad).lat.deg, 0.01
+    assert_in_delta -1, Rhumb.from(c,r,269.99.rad).lon.deg, 0.01
+    assert_in_delta -1, Rhumb.from(c,r,270.00.rad).lon.deg, 0.01
+    assert_in_delta  0, Rhumb.from(c,r,270.00.rad).lat.deg, 0.01
+    assert_in_delta -1, Rhumb.from(c,r,270.01.rad).lon.deg, 0.01
+    assert_in_delta  1, Rhumb.from(c,r,359.99.rad).lat.deg, 0.01
+    assert_in_delta  1, Rhumb.from(c,r,360.00.rad).lat.deg, 0.01
+    assert_in_delta  1, Rhumb.from(c,r,360.01.rad).lat.deg, 0.01
+  end
 end

@@ -6,6 +6,7 @@ module Aviation
   module Rhumb
     Eccentricity = 0.081
     R = "6378.155 km".u
+    Epsilon = 2**(-23)
 
     # coord[12]:: Aviation::Coordinate
     # Returns a polar vector [r, theta] (km, radians)
@@ -51,15 +52,19 @@ module Aviation
     # Returns the destination coordinate
     def self.from(coord, r, theta)
       lat1, lon1 = coord.to_a
-      theta %= 2*PI
 
-      dL = (r * Math.cos(theta) / R).to_base.to_f
-
-      dE = sigma(lat1 + dL) - sigma(lat1)
-      # XXX This breaks down at 90°,180°,270°, because of numerical imprecision
-      # with dE or tan(theta). Figure out a workaround or more numerically
-      # stable equations
-      dl = dE * Math.tan(theta)
+      m = 1/Math.tan(theta)
+      if m.abs < Epsilon
+        dL = 0
+        dl = (r/R).to_base.scalar
+        dl = -dl if Math.sin(theta) < 0 # westbound
+      else
+        dL = r/(R * Math.sqrt(1 + (1/(m*m))))
+        dL = dL.to_base.scalar
+        dL = -dL if Math.cos(theta) < 0 # southbound
+        dE = sigma(lat1 + dL) - sigma(lat1)
+        dl = dE/m
+      end
 
       [lat1 + dL, lon1 + dl].coord
     end

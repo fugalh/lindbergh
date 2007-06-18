@@ -25,7 +25,7 @@ module Waypoint
       @checkpoint = cp
       @dir = dir
       @dist = dist
-      coord = cp.coord # TODO
+      coord = Aviation::Rhumb.from(@checkpoint.coord, @dist, @dir)
       super coord, comment
     end
   end
