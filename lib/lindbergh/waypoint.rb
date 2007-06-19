@@ -14,7 +14,13 @@ module Waypoint
     def initialize(cp1, radial1, cp2, radial2, comment)
       @checkpoints = [cp1, cp2]
       @radials = [radial1, radial2]
-      coord = cp1.coord # TODO
+      
+      theta1 = radial1
+      theta1 += cp1.variation if cp1.is_a?(Aviation::VOR)
+      theta2 = radial2
+      theta2 += cp2.variation if cp2.is_a?(Aviation::VOR)
+
+      coord = Aviation::Rhumb.intersection(cp1.coord, theta1, cp2.coord, theta2)
       super coord, comment
     end
   end

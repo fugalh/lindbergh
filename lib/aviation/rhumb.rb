@@ -36,10 +36,20 @@ module Aviation
     end
 
     # ∑ (Sigma)
-    def self.sigma(l)
-      esinl = Eccentricity * Math.sin(l)
-      Math.log(1/Math.cos(l) + Math.tan(l)) - 
-        (Eccentricity/2) * Math.log((1 + esinl) / (1 - esinl))
+    def self.sigma(lat)
+      # elliptical
+      #esinl = Eccentricity * Math.sin(lat)
+      #Math.log(1/Math.cos(lat) + Math.tan(lat)) - 
+      #  (Eccentricity/2) * Math.log((1 + esinl) / (1 - esinl))
+      
+      # XXX Spherical here, so the inverse works. It'll be good enough until we
+      # can figure out the inverse of the ellipsoid sigma.
+      Math.log(Math.tan(0.5*(Math::PI/2 + lat)))
+    end
+
+    # ∑ inverse XXX not close enough. need the elliptical one
+    def self.cosigma(s)
+      2 * Math.atan(Math.exp(s)) - Math::PI/2
     end
 
     def self.acot(x)
@@ -67,6 +77,26 @@ module Aviation
       end
 
       [lat1 + dL, lon1 + dl].coord
+    end
+
+    # Returns the coordinate for the intersection of the two coordinates along
+    # the true course radials.
+    def self.intersection(coord1, theta1, coord2, theta2)
+      s1 = sigma(coord1.lat)
+      s2 = sigma(coord2.lat)
+      l1 = coord1.lon
+      l2 = coord2.lon
+      m1 = 1/Math.tan(theta1)
+      m2 = 1/Math.tan(theta2)
+
+      b1 = s1 - m1*l1
+      b2 = s2 - m2*l2
+      # m1 x + b1 = m2 x + b2
+      lon = (b2-b1)/(m1-m2)
+      s = m1*lon + b1
+      lat = cosigma(s)
+
+      [lat, lon].coord
     end
   end
 end
