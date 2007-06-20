@@ -59,7 +59,7 @@ class PlanParser
     tok, val = case @input
                when /\A(\([^)]*\))/
                  [:str, $1]
-               when /\A([;\/@'"]|(from|via|to|climb|alt|nav|[it]as|wind|calm|temp|[nsewNSEW])\b)/
+               when /\A([;\/@'"]|(from|via|to|climb|desc(end)?|up|down|alt|nav|[it]as|wind|calm|temp|[nsewNSEW])\b)/
                  [$1, $1]
                when /\A(deg(rees?)?\b|°)/
                  [:deg, $&]

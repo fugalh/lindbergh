@@ -47,30 +47,42 @@ module Waypoint
 
   class Incremental < Waypoint
     attr_reader :dist
-    def initialize(prev_leg, dist, comment)
-      if dist < 0
-        dist = -dist
-        c = prev_leg.to
-        t = prev_leg.tc
-      else
-        c = prev_leg.from
-        t = prev_leg.tc + 180.rad
-      end
-      coord = Aviation::Rhumb.from(c, dist, t)
-      super coord, comment
+    attr_accessor :from, :to
+    def initialize(dist, comment)
+      @dist, @comment = [dist, comment]
+    end
+    def coord
+      raise "Not enough context" unless from and to
+      t = from.coord.bearing(to.coord)
+      Aviation::Rhumb.from(from.coord, dist, t)
     end
   end
 
-  class Climb < Waypoint
-    attr_reader :alt, :rate
-    def initialize(alt, rate)
-      raise "Incremental waypoints not yet implemented"
-      @alt, @rate = [alt, rate]
-      coord = nil # TODO
+  class Climb < Incremental
+    attr_reader :alt2, :rate
+    attr_accessor :alt1, :tas
+    def initialize(alt2, rate)
+      @alt2, @rate = [alt2, rate]
     end
     def seconds
-      @alt / @rate
+      (height / rate).to('seconds')
+    end
+    def height
+      raise "Need previous altitude for climb calculation" unless alt1
+      alt2 - alt1
+    end
+    def alt1
+      @alt1
+    end
+    def dist
+      raise "Need TAS for climb calculation" unless tas
+      (seconds * tas).to('nmi')
     end
   end
-  class Descend < Climb; end
+
+  class Descend < Climb
+    def height
+      -super
+    end
+  end
 end

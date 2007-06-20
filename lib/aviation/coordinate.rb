@@ -111,7 +111,7 @@ module Aviation
         ew = "E"
       end
 
-      sprintf "%3d°%6.3f'%s %3d°%6.3f'%s", d1, m1, ns, d2, m2, ew
+      sprintf "%d°%.3g'%s %d°%.3g'%s", d1, m1, ns, d2, m2, ew
     end
 
     def +(o)

@@ -165,7 +165,7 @@ module Aviation
         b = (a+18)%36
         b = 36 if b == 0
         suffix = num[2..-1]
-        sprintf("%02d%s/%02d%s",a,suffix,b,suffix)
+        sprintf("%d%s/%d%s",a,suffix,b,suffix)
       end
     end
 

@@ -1,6 +1,6 @@
 class PlanParser
 
-token ident descend fuel_amount fuel_rate fuel_used str deg rad number sm nmi km ft meter mph kts kph fps mps cf to 
+token ident fuel_amount fuel_rate fuel_used str deg rad number sm nmi km ft meter mph kts kph fps mps cf to 
 
 rule
 
@@ -30,7 +30,7 @@ statement: fromviato checkpoint
          | 'to' dist comment
          { add_waypoint Waypoint::Incremental.new(*val[1..2]) }
 
-         | 'climb' alt climb_rate
+         | climb alt climb_rate
          { add_waypoint Waypoint::Climb.new(*val[1..2]) }
 
          | descend alt climb_rate
@@ -46,7 +46,7 @@ statement: fromviato checkpoint
          { @leg.fuel_used = val[1] }
 
          | 'alt' alt
-         { @leg.alt = val[1] }
+         { @leg.alt = @alt = val[1] }
 
          | 'comment' str
          { @leg.comment = val[1] }
@@ -160,6 +160,10 @@ temp: number            { result = 'tempC'.u * val[0] }
     | number cf         { result = val[1] * val[0] }
     ;
 
-climb_rate: number              { result = 'ft/sec'.u * val[0] }
+climb: 'climb' | 'up'
+     ;
+descend: 'descend' | 'desc' | 'down'
+     ;
+climb_rate: number              { result = 'ft/min'.u * val[0] }
           | number speed_unit   { result = val[1] * val[0] }
           ;
