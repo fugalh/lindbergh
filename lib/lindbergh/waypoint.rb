@@ -31,7 +31,9 @@ module Waypoint
       @checkpoint = cp
       @dir = dir
       @dist = dist
-      coord = Aviation::Rhumb.from(@checkpoint.coord, @dist, @dir)
+      t = dir
+      t += cp.variation if cp.is_a?(Aviation::VOR)
+      coord = Aviation::Rhumb.from(@checkpoint.coord, @dist, t)
       super coord, comment
     end
   end

@@ -16,7 +16,7 @@ class Leg < OpenStruct
     return nil if wind.nil? or tas.nil?
     wd, ws = wind
     xw = Math.sin(wd-tc)*ws # crosswind component
-    (xw/tas).to_f
+    (xw/tas).to_base.to_f
   end
   def mh
     wca2 = wca || 0
