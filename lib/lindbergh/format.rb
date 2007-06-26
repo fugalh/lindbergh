@@ -124,6 +124,9 @@ module Waypoint
   end
   class Checkpoint
     def to_s
+      s = StringIO.new
+      s.puts @checkpoint.ident
+      s.puts @checkpoint.name
       case @checkpoint 
       when Aviation::Airport
         # KLRU
@@ -133,17 +136,26 @@ module Waypoint
         # 122.7  CTAF/UNICOM
         # 32°17.4'N 106°55.3W
 
-        s = StringIO.new
-        s.puts @checkpoint.ident
-        s.puts @checkpoint.name
         s.puts sprintf("%dft  %s", @checkpoint.alt, 
                        @checkpoint.runways.map {|r| r.to_s}.join(", "))
         @checkpoint.freqs.each {|f| s.puts sprintf("%6.2f  %s", f.mhz, f.name)}
-        s.puts @checkpoint.coord
-        s.string
+      when Aviation::VOR
+	var = @checkpoint.variation.deg
+	ew = "E"
+	if var < 0
+	  var = -var
+	  ew = "W"
+	end
+	s.puts sprintf("%g MHz\n%g ft, %g nm, %g°%s", 
+		       @checkpoint.freq, @checkpoint.alt, @checkpoint.range,
+		       var, ew)
+      when Aviation::NDB
+	s.puts sprintf("%g MHz\n%g ft, %g nm", 
+		       @checkpoint.freq, @checkpoint.alt, @checkpoint.range)
       else
-        super
       end
+      s.puts @checkpoint.coord
+      s.string
     end
   end
   class Incremental

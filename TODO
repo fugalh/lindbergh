@@ -1,5 +1,6 @@
 bugs
     - 90 degrees travel gives 0 distance
+    - want closest checkpoint (BAM VOR is an example)
 more thorough db generation tests
 more thorough parsing tests
 plan calculations
