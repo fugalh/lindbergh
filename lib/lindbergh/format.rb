@@ -126,7 +126,7 @@ module Waypoint
     def to_s
       s = StringIO.new
       s.puts @checkpoint.ident
-      s.puts @checkpoint.name
+      s.puts @checkpoint.name if @checkpoint.name
       case @checkpoint 
       when Aviation::Airport
         # KLRU
